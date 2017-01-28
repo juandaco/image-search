@@ -8,7 +8,6 @@ const app = express();
 const port = process.env.PORT || 8080;
 const apiKey = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY;
 const dbURL = process.env.MLAB_CREDENTIALS;
-const appURL = 'https://agile-hollows-58079.herokuapp.com/';
 
 
 mongoClient.connect(dbURL, (err, db) => {
