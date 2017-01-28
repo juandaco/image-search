@@ -34,48 +34,49 @@ mongoClient.connect(dbURL, (err, db) => {
       when: new Date(Date.now()),
     });
 
-    let count;
-    collection.find({}).toArray((e, c) => count = c);
-    if (count === 10) {
-     collection.remove({}, {justOne: 1});
-    }
+    collection.find({}).count((err, count)=> {
+      if (count >= 10) {
+        collection.removeOne();
+      }
+    });
+
 
     searchTerms = encodeURIComponent(searchTerms);
     const offset = req.query.offset;
     const restURL = `https://www.googleapis.com/customsearch/v1?q=${searchTerms}` +
       `&cx=008736666289582417959%3Aofkviqpt1-w&searchType=image` +
       `${Number(offset) ? "&start=" + offset : ""}&key=${apiKey}`;
+    
+        request(restURL, (err, response, body) => {
+          if (err) throw err;
+          let data = JSON.parse(body);
+          let items = data.items;
 
-    request(restURL, (err, response, body) => {
-      if (err) throw err;
-      let data = JSON.parse(body);
-      let items = data.items;
+          let results = items.map(item => {
+            const image = {
+              url: item.link,
+              snippet: item.snippet,
+              thumbnail: item.image.thumbnailLink,
+              context: item.image.contextLink,
+            };
 
-      let results = items.map(item => {
-        const image = {
-          url: item.link,
-          snippet: item.snippet,
-          thumbnail: item.image.thumbnailLink,
-          context: item.image.contextLink,
-        };
+            return image;
+          });
 
-        return image;
-      });
-
-      res.json(results);
-    });
+          res.json(results);
+        });
   });
 
   // Get latest search results
   app.get('/api/latest/imagesearch/', (req, res) => {
-  	collection.find({}).toArray((err, docs) => {
-  		docs.reverse();
-  		const results = docs.map(doc => {
-  			delete doc._id;
-  			return doc;
-  		});
-  		res.json(docs);
-  	});
+    collection.find({}).toArray((err, docs) => {
+      docs.reverse();
+      const results = docs.map(doc => {
+        delete doc._id;
+        return doc;
+      });
+      res.json(docs);
+    });
   });
 
   app.listen(port, function() {
