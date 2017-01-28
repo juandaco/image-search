@@ -19,7 +19,8 @@
   "homepage": "https://github.com/juandaco/image-search#readme",
   "dependencies": {
     "express": "^4.14.0",
-    "mongodb": "^2.2.22"
+    "mongodb": "^2.2.22",
+    "request": "^2.79.0"
   },
   "engines": {
     "node": "7.4.0"
